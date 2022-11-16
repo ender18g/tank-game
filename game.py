@@ -9,14 +9,14 @@ pygame.init()
 clock = pygame.time.Clock()
 
 # define our grid
-TILE_SIZE = 64
+TILE_SIZE = 128
 WINDOW_WIDTH = 10 * TILE_SIZE
 WINDOW_HEIGHT = 8 * TILE_SIZE 
 
 # define images for our background
-grass = pygame.image.load("images/Environment/grass.png")
-dirt = pygame.image.load("images/Environment/dirt.png")
-sand = pygame.image.load("images/Environment/sand.png")
+grass = pygame.image.load("images/Retina/tileGrass1.png")
+dirt = pygame.image.load("images/Retina/tileSand1.png")
+sand = pygame.image.load("images/Retina/tileSand_roadNorth.png")
 
 soils = [grass,dirt,sand]
 
@@ -35,7 +35,6 @@ def draw_background():
 
 tank = Tank(screen)
 
-
 font = pygame.font.SysFont(None, 24)
 score = 1024
 
@@ -48,9 +47,10 @@ while True:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_q:
                 sys.exit()
-        if event.type == pygame.MOUSEMOTION:
-            # use  event.pos to aim the tank
-            tank.move(event.pos)
+            if event.key == pygame.K_UP:
+                tank.change_speed(1)
+            if event.key == pygame.K_RIGHT:
+                tank.change_omega(1)
 
     # use the clock to slow down FPS
     clock.tick(60)
