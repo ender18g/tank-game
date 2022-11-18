@@ -3,6 +3,7 @@ from time import sleep
 from background import draw_background, TILE_SIZE
 import sys
 from tank import Tank
+import math
 
 # init pygame
 pygame.init()
@@ -39,16 +40,16 @@ while True:
             if event.key == pygame.K_LEFT:
                 tank.change_omega(-1)
 
-    # use the clock to slow down FPS
-    clock.tick(60)
     pygame.display.set_caption(f"FIDOH's Tank Game {clock.get_fps():.0f}")
     # update the background
     screen.blit(bg, bg.get_rect())
+    tank.update()
     tank.draw()
     # add in a score
     img = font.render(f"Score: {score}", True, (255, 0, 0))
     screen.blit(img, (20, 20))
     score += 1
-
     # last step to update our screen
     pygame.display.flip()
+    # use the clock to slow down FPS
+    clock.tick(60)
