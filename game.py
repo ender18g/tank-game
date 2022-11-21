@@ -4,6 +4,7 @@ from background import draw_background, TILE_SIZE
 import sys
 from tank import Tank
 import math
+from wall import Wall
 
 # init pygame
 pygame.init()
@@ -17,10 +18,19 @@ WINDOW_HEIGHT = 8 * TILE_SIZE
 screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 
 
-tank = Tank(screen)
 bg = draw_background((WINDOW_WIDTH, WINDOW_HEIGHT))
 font = pygame.font.SysFont(None, 24)
 score = 1024
+
+# make a sample wall
+wall1 = Wall(screen,(300,300))
+wall2 = Wall(screen,(400,400),'vertical')
+
+# add our walls to sprite group
+wall_group = pygame.sprite.Group()
+wall_group.add(wall1,wall2)
+# init a tank instance
+tank = Tank()
 
 # while loop that runs the game
 while True:
@@ -39,12 +49,17 @@ while True:
                 tank.change_omega(1)
             if event.key == pygame.K_LEFT:
                 tank.change_omega(-1)
+        if(event.type == pygame.MOUSEBUTTONDOWN):
+            ## fire a bullet
+            print(event)
 
     pygame.display.set_caption(f"FIDOH's Tank Game {clock.get_fps():.0f}")
     # update the background
     screen.blit(bg, bg.get_rect())
-    tank.update()
-    tank.draw()
+    tank.update(wall_group)
+    tank.draw(screen)
+    # blit all of the wall using sprite group
+    pygame.sprite.Group.draw(wall_group,screen)
     # add in a score
     img = font.render(f"Score: {score}", True, (255, 0, 0))
     screen.blit(img, (20, 20))

@@ -1,9 +1,9 @@
 import pygame
-from pygame.sprite import Sprite
 import math
 
-class Tank(Sprite):
-    def __init__(self,screen):
+class Tank(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
         self.image = pygame.image.load('images/Retina/tank_blue.png').convert_alpha()
         self.rect = self.image.get_rect()
         self.x = 200
@@ -11,7 +11,6 @@ class Tank(Sprite):
         self.theta = 0 # this is degrees
         self.speed = 0
         self.omega = 0 # angular velocity
-        self.screen = screen
 
     def move_location(self,location):
         self.rect.center = location
@@ -27,12 +26,19 @@ class Tank(Sprite):
         self.speed= 0
         self.omega+=delta
 
-    def update(self):
+    def update(self,wall_group):
         # update the position based on speed
-        # convert theta to radians
         theta_rads = math.pi/ 180.0 * self.theta
-        self.y += self.speed * math.cos(theta_rads)
-        self.x += self.speed * math.sin(theta_rads)
+        new_y = self.y + self.speed * math.cos(theta_rads)
+        new_x = self.x +self.speed * math.sin(theta_rads)
+
+        # if the new position does not hit a wall, set x,y to new pos
+        if(not pygame.sprite.spritecollide(self,wall_group,False)):
+            self.y = new_y
+            self.x = new_x
+        else:
+            print("collision!")
+
         # change angle based on arrow key OLD FEATURE
         ## self.theta -= self.omega
 
@@ -43,20 +49,16 @@ class Tank(Sprite):
         delta_y = self.y - mouse_y
         # find the angle to mouse and pass to tank theta
         self.theta = math.atan2(delta_y,delta_x) * 180/math.pi + 90
-        # check if mouse pressed and fire bullet
-        if pygame.mouse.get_pressed()[0]:
-            # fire a bullet here
-            pass
 
 
-    def draw(self):
+    def draw(self, screen):
         # now update the rectangle position
         intX = int(self.x)
         intY = int(self.y)
         self.rect.center = (self.x, self.y)
         # twist the tank by theta       
         rot_tank = pygame.transform.rotate(self.image, self.theta)
-        # get a new rectangle for the updated/rotatd image
+        # get a new rectangle for the updated/rotated image
         rot_rect = rot_tank.get_rect(center = self.rect.center)
-
-        self.screen.blit(rot_tank, rot_rect)
+        # draw tank on the screen
+        screen.blit(rot_tank, rot_rect)
