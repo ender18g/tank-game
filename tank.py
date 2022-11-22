@@ -1,5 +1,6 @@
 import pygame
 import math
+from bullet import Bullet
 
 class Tank(pygame.sprite.Sprite):
     def __init__(self):
@@ -26,11 +27,19 @@ class Tank(pygame.sprite.Sprite):
         self.speed= 0
         self.omega+=delta
 
+    def shoot(self):
+        return Bullet(self.x,self.y,self.theta)
+
+
     def update(self,wall_group):
         # update the position based on speed
         theta_rads = math.pi/ 180.0 * self.theta
         new_y = self.y + self.speed * math.cos(theta_rads)
         new_x = self.x +self.speed * math.sin(theta_rads)
+        # new rectangle is rectangle of tank
+        old_rect = self.rect
+        # update x and y position of current rect
+        self.rect.center = (new_x,new_y)
 
         # if the new position does not hit a wall, set x,y to new pos
         if(not pygame.sprite.spritecollide(self,wall_group,False)):
@@ -38,10 +47,9 @@ class Tank(pygame.sprite.Sprite):
             self.x = new_x
         else:
             print("collision!")
-
-        # change angle based on arrow key OLD FEATURE
-        ## self.theta -= self.omega
-
+            # go back to the old rectangle
+            self.rect = old_rect
+            ## do not update self.y and self.x 
         # NEW FEATURE CHANGE ANGLE BASED ON MOUSE
         # get the mouse cursor
         mouse_x, mouse_y = pygame.mouse.get_pos()
@@ -49,7 +57,6 @@ class Tank(pygame.sprite.Sprite):
         delta_y = self.y - mouse_y
         # find the angle to mouse and pass to tank theta
         self.theta = math.atan2(delta_y,delta_x) * 180/math.pi + 90
-
 
     def draw(self, screen):
         # now update the rectangle position

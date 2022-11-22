@@ -22,13 +22,24 @@ bg = draw_background((WINDOW_WIDTH, WINDOW_HEIGHT))
 font = pygame.font.SysFont(None, 24)
 score = 1024
 
-# make a sample wall
-wall1 = Wall(screen,(300,300))
-wall2 = Wall(screen,(400,400),'vertical')
-
 # add our walls to sprite group
 wall_group = pygame.sprite.Group()
-wall_group.add(wall1,wall2)
+bullet_group = pygame.sprite.Group()
+
+# build horizontal walls
+for x in range(0,WINDOW_WIDTH,TILE_SIZE):
+    for y in (0,WINDOW_HEIGHT-50):
+        wall = Wall((x,y))
+        # add the wall to our sprite group
+        wall_group.add(wall)
+
+# build vertical walls
+for y in range(0,WINDOW_HEIGHT,TILE_SIZE):
+    for x in (0,WINDOW_WIDTH-50):
+        wall = Wall((x,y),'vertical')
+        # add the wall to our sprite group
+        wall_group.add(wall)
+
 # init a tank instance
 tank = Tank()
 
@@ -51,11 +62,15 @@ while True:
                 tank.change_omega(-1)
         if(event.type == pygame.MOUSEBUTTONDOWN):
             ## fire a bullet
-            print(event)
+            print("FIRING BULLET")
+            bullet_group.add(tank.shoot())
 
     pygame.display.set_caption(f"FIDOH's Tank Game {clock.get_fps():.0f}")
     # update the background
     screen.blit(bg, bg.get_rect())
+    # update bullets and draw bullets
+    bullet_group.update()
+    pygame.sprite.Group.draw(bullet_group,screen)
     tank.update(wall_group)
     tank.draw(screen)
     # blit all of the wall using sprite group
