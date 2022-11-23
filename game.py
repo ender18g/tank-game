@@ -17,7 +17,6 @@ WINDOW_HEIGHT = 8 * TILE_SIZE
 # draw our screen with background
 screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 
-
 bg = draw_background((WINDOW_WIDTH, WINDOW_HEIGHT))
 font = pygame.font.SysFont(None, 24)
 score = 1024
@@ -65,11 +64,16 @@ while True:
             print("FIRING BULLET")
             bullet_group.add(tank.shoot())
 
+    # check for collisions and blow stuff up
+    collisions = pygame.sprite.groupcollide(bullet_group,wall_group,False,False)
+    if collisions: print(collisions)
+
+
     pygame.display.set_caption(f"FIDOH's Tank Game {clock.get_fps():.0f}")
     # update the background
     screen.blit(bg, bg.get_rect())
     # update bullets and draw bullets
-    bullet_group.update()
+    bullet_group.update(wall_group)
     pygame.sprite.Group.draw(bullet_group,screen)
     tank.update(wall_group)
     tank.draw(screen)

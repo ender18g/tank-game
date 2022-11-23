@@ -46,7 +46,6 @@ class Tank(pygame.sprite.Sprite):
             self.y = new_y
             self.x = new_x
         else:
-            print("collision!")
             # go back to the old rectangle
             self.rect = old_rect
             ## do not update self.y and self.x 

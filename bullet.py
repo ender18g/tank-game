@@ -12,10 +12,20 @@ class Bullet(pygame.sprite.Sprite):
         self.y = y
         self.theta = theta
         self.speed = 5
-    def update(self):
+    def update(self,wall_group):
         self.y += self.speed * math.cos(self.theta_rads())
         self.x += self.speed * math.sin(self.theta_rads())
         self.rect.center = (int(self.x),int(self.y))
+        # check for bullet hitting a wall
+        has_collided = pygame.sprite.spritecollideany(self, wall_group)
+        if has_collided:
+            # make the bullet explode
+            self.image = pygame.image.load('images/Retina/explosionSmoke2.png')
+            self.rect = self.image.get_rect()
+            self.rect.center = (int(self.x),int(self.y))
+
+
+
     def theta_rads(self):
         # return theta in radians
         return math.pi/180 * self.theta
