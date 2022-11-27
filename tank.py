@@ -4,6 +4,8 @@ from bullet import Bullet
 
 
 class Tank(pygame.sprite.Sprite):
+    '''This is the user tank that moves around based on mouse position'''
+
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
         self.original = pygame.image.load(
@@ -15,6 +17,8 @@ class Tank(pygame.sprite.Sprite):
         self.theta = 0  # this is degrees
         self.speed = 2
         self.omega = 0  # angular velocity
+        self.score = 0
+        self.health = 100
 
     def move_location(self, location):
         self.rect.center = location
@@ -35,7 +39,7 @@ class Tank(pygame.sprite.Sprite):
     def shoot(self):
         return Bullet(self.x, self.y, self.theta, self)
 
-    def update(self, wall_group):
+    def update(self, wall_group, bullet_group, enemy_group, enemy_bullet_group):
         # update the position based on speed
         theta_rads = math.pi / 180.0 * self.theta
         new_y = self.y + self.speed * math.cos(theta_rads)
@@ -68,6 +72,25 @@ class Tank(pygame.sprite.Sprite):
         self.image = pygame.transform.rotate(self.original, self.theta)
         # get a new rectangle for the updated/rotated image
         self.rect = self.image.get_rect(center=self.rect.center)
+
+        # check to see if our tank killed an enemy
+        self.check_offense(bullet_group, enemy_group)
+        self.check_defense(enemy_bullet_group)
+
+    def check_offense(self, bullet_group, enemy_group):
+        collisions = pygame.sprite.groupcollide(
+            bullet_group, enemy_group, False, True)
+        if (collisions):
+            for bullet in collisions:
+                bullet.explode()
+                self.score += 100
+
+    def check_defense(self, enemy_bullet_group):
+        collision = pygame.sprite.spritecollideany(self, enemy_bullet_group)
+        if collision:
+            self.health -= 1
+        if self.health <= 0:
+            self.kill()
 
     def draw(self, screen):
         # draw tank on the screen

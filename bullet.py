@@ -23,21 +23,17 @@ class Bullet(pygame.sprite.Sprite):
         main_group = main_group.copy()
         pygame.sprite.Group.remove(main_group, self.mother)
         pygame.sprite.Group.remove(main_group, self)
-        # check for bullet hitting a wall
+        # check for bullet hitting any other sprite
         has_collided = pygame.sprite.spritecollideany(self, main_group)
-        print(has_collided)
+        # if the bullet has already started exploding, let it finish off
         if self.exploded:
-            # if you have exploded, just wait to kill off
+            # if you have exploded, just wait for a time interval to kill off
             if pygame.time.get_ticks() - self.exp_time > self.exp_length:
                 self.kill()
         elif has_collided:
-            # make the bullet explode
-            self.image = pygame.image.load('images/Retina/explosionSmoke2.png')
-            self.rect = self.image.get_rect()
-            self.rect.center = (int(self.x), int(self.y))
-            self.exp_time = pygame.time.get_ticks()
-            self.exploded = True
+            self.explode()
         else:
+            # otherwise, keep on moving in the set direction
             self.y += self.speed * math.cos(self.theta_rads())
             self.x += self.speed * math.sin(self.theta_rads())
             self.rect.center = (int(self.x), int(self.y))
@@ -45,3 +41,11 @@ class Bullet(pygame.sprite.Sprite):
     def theta_rads(self):
         # return theta in radians
         return math.pi/180 * self.theta
+
+    def explode(self):
+        # make the bullet explode if it collided with a wall
+        self.image = pygame.image.load('images/Retina/explosionSmoke2.png')
+        self.rect = self.image.get_rect()
+        self.rect.center = (int(self.x), int(self.y))
+        self.exp_time = pygame.time.get_ticks()
+        self.exploded = True
