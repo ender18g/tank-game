@@ -6,6 +6,7 @@ from tank import Tank
 from enemy_tank import EnemyTank
 from random import randint, shuffle
 from wall import Wall
+from bullet_bar import BulletBar
 
 # init pygame
 pygame.init()
@@ -15,6 +16,8 @@ bullets_per_enemy = 3
 padding = 100
 shoot_delay = 150  # smaller delay for more shots
 bullet_cost = 200
+bullet_health = 200
+bullet_max = 4 * bullet_cost
 
 # define our grid
 WINDOW_WIDTH = 10 * TILE_SIZE
@@ -56,12 +59,11 @@ for i in range(num_enemies):
     y_loc = randint(0+padding, WINDOW_HEIGHT-padding)
     theta = randint(0, 360)
     enemy_group.add(EnemyTank(x_loc, y_loc, theta))
+bullet_bar = BulletBar()
 
 
 # while loop that runs the game
 while True:
-    # update main group
-    main_group.empty()
     main_group.add(enemy_group, wall_group, tank)
 
     for event in pygame.event.get():
@@ -80,11 +82,11 @@ while True:
             if event.key == pygame.K_LEFT:
                 tank.change_omega(-1)
         if (event.type == pygame.MOUSEBUTTONDOWN):
-            if score > bullet_cost:
+            if bullet_health >= bullet_cost:
                 # fire a bullet
                 print("FIRING BULLET")
                 bullet_group.add(tank.shoot())
-                score -= bullet_cost
+                bullet_health -= bullet_cost
 
     pygame.display.set_caption(f"FIDOH's Tank Game {clock.get_fps():.0f}")
     # update the background
@@ -95,6 +97,7 @@ while True:
     # update and draw tanks
     tank.update(wall_group)
     tank.draw(screen)
+
     # update and draw enemy tanks
     enemy_group.draw(screen)
     # fire enemy tank bullets
@@ -109,9 +112,15 @@ while True:
     # blit all of the wall using sprite group
     wall_group.draw(screen)
     # add in a score
-    img = font.render(f"Score: {score}", True, (255, 0, 0))
+    img = font.render(f"Score: {bullet_health}", True, (255, 0, 0))
     score += 1
     screen.blit(img, (50, 50))
+    # draw bullet bar
+    bullet_health += 1
+    if bullet_health > bullet_max:
+        bullet_health = bullet_max
+    bullet_bar.update(bullet_health/bullet_max)
+    bullet_bar.draw(screen)
     # last step to update our screen
     pygame.display.flip()
     # use the clock to slow down FPS
