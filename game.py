@@ -112,7 +112,7 @@ last_shot = pygame.time.get_ticks()
 
 # make the bullet bar
 bullet_bar = Bar('yellow', 1)
-health_bar = Bar('red', 0)
+health_bar = Bar('blue', 0)
 
 
 # while loop that runs the game

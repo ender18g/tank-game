@@ -17,6 +17,7 @@
 - Press Up arrow to speed up
 - Press Down arrow to slow down
 - Left click the mouse button to shoot
+- Press 'Q' to quit the game
 
 ### Additional Features
 - You are awarded 100 points for each enemy tank you kill
