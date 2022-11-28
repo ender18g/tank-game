@@ -4,7 +4,7 @@ from background import draw_background, TILE_SIZE
 import sys
 from tank import Tank
 from enemy_tank import EnemyTank
-from random import randint, shuffle
+from random import randint, choice
 from wall import Wall
 from bar import Bar
 from time import sleep
@@ -12,13 +12,13 @@ from time import sleep
 # init pygame
 pygame.init()
 clock = pygame.time.Clock()
-num_enemies = 2
-bullets_per_enemy = 3
+num_enemies = 1
 padding = 100
-shoot_interval = 500  # delay in ms
+shoot_interval = 2000  # delay in ms
 bullet_cost = 200
-bullet_health = 200
 bullet_max = 10 * bullet_cost
+bullet_health = bullet_max
+num_extra_walls = 7
 
 # define our grid
 WINDOW_WIDTH = 10 * TILE_SIZE
@@ -29,7 +29,6 @@ screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 
 bg = draw_background((WINDOW_WIDTH, WINDOW_HEIGHT))
 font = pygame.font.SysFont(None, 24)
-score = 10
 
 # add our walls to sprite group
 friendly_group = pygame.sprite.Group()
@@ -54,22 +53,40 @@ for y in range(0, WINDOW_HEIGHT, TILE_SIZE):
         wall_group.add(wall)
 
 
-def make_enemies(enemy_group, num=1):
+def get_random_position():
+    x_loc = randint(0+padding, WINDOW_WIDTH-padding)
+    y_loc = randint(0+padding, WINDOW_HEIGHT-padding)
+    return (x_loc, y_loc)
+
+
+# build random walls
+for i in range(num_extra_walls):
+    wall_group.add(Wall(get_random_position(),
+                   choice(['vertical', 'horizontal'])))
+
+
+def make_enemies(enemy_group, num_enemies=1):
     current_num = len(enemy_group.sprites())
     # init enemy tanks
     for i in range(current_num, num_enemies):
-        x_loc = randint(0+padding, WINDOW_WIDTH-padding)
-        y_loc = randint(0+padding, WINDOW_HEIGHT-padding)
         theta = randint(0, 360)
-        enemy_group.add(EnemyTank(x_loc, y_loc, theta))
+        new_enemy = EnemyTank(*get_random_position(), theta)
+        if not pygame.sprite.spritecollideany(new_enemy, wall_group):
+            enemy_group.add(new_enemy)
 
 
 def end_game():
     while True:
         screen.fill((200, 100, 100))
-        img = font.render(f"GAME OVER - Press Spacebar", True, (230, 230, 230))
+        img = font.render(
+            f"GAME OVER - Press Spacebar", True, (230, 230, 230))
         img_rect = img.get_rect()
         img_rect.center = screen.get_rect().center
+        screen.blit(img, img_rect)
+        img = font.render(
+            f"Score: {tank.score}", True, (20, 20, 20))
+        img_rect = img.get_rect()
+        img_rect.midbottom = screen.get_rect().midbottom
         screen.blit(img, img_rect)
         pygame.display.flip()
         clock.tick()
@@ -81,7 +98,11 @@ def end_game():
                     sys.exit()
                 if event.key == pygame.K_SPACE:
                     friendly_group.add(tank)
+                    # reset health and score of tank
                     tank.health = 100
+                    tank.score = 0
+                    for sprite in enemy_group:
+                        sprite.kill()
                     return 0
 
 
@@ -98,9 +119,8 @@ health_bar = Bar('red', 0)
 while True:
     if not tank.alive():
         end_game()
-        break
     # make enemies
-    make_enemies(enemy_group, num_enemies)
+    make_enemies(enemy_group, tank.score//500+1)
     main_group.add(enemy_group, wall_group, friendly_group)
 
     for event in pygame.event.get():
@@ -121,7 +141,6 @@ while True:
         if (event.type == pygame.MOUSEBUTTONDOWN):
             if bullet_health >= bullet_cost:
                 # fire a bullet
-                print("FIRING BULLET")
                 bullet_group.add(tank.shoot())
                 bullet_health -= bullet_cost
 
@@ -152,7 +171,6 @@ while True:
     wall_group.draw(screen)
     # add in a score
     img = font.render(f"Score: {tank.score}", True, (255, 0, 0))
-    score += 1
     screen.blit(img, (50, 50))
     # draw bullet bar
     bullet_health += 1
